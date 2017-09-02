@@ -10,7 +10,7 @@ import (
 type Account struct {
 	PubKey   crypto.PubKey `json:"pub_key"` // May be nil, if not known.
 	Sequence int           `json:"sequence"`
-	Balance  Coins         `json:"coins"`
+	//Balance  Coins         `json:"coins"`
 }
 
 func (acc *Account) Copy() *Account {
@@ -25,8 +25,8 @@ func (acc *Account) String() string {
 	if acc == nil {
 		return "nil-Account"
 	}
-	return fmt.Sprintf("Account{%v %v %v}",
-		acc.PubKey, acc.Sequence, acc.Balance)
+	//return fmt.Sprintf("Account{%v %v %v}", acc.PubKey, acc.Sequence, acc.Balance)
+	return fmt.Sprintf("Account{%v %v}", acc.PubKey, acc.Sequence)
 }
 
 //----------------------------------------
