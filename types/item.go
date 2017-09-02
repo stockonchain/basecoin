@@ -24,8 +24,8 @@ func (item Item) String() string {
 }
 
 //regex codes for extracting coins from string
-var reDenom = regexp.MustCompile("")
-var reAmt = regexp.MustCompile("(\\d+)")
+//var reDenom = regexp.MustCompile("")
+//var reAmt = regexp.MustCompile("(\\d+)")
 
 var reItem = regexp.MustCompile("^([[:digit:]]+)[[:space:]]*([[:digit:]]+)$")
 
@@ -43,7 +43,8 @@ func ParseItem(str string) (Item, error) {
 		return item, err
 	}
 
-	item = Item{matches[2], int64(amt)}
+	id, err := strconv.Atoi(matches[2])
+	item = Item{int64(id), int64(amt)}
 	return item, nil
 }
 
@@ -222,5 +223,6 @@ func (coins Coins) IsNonnegative() bool {
 
 func (i Items) Len() int           { return len(i) }
 //func (c Coins) Less(i, j int) bool { return c[i].Denom < c[j].Denom }
-func (i Items) Swap(j, k int)      { c[j], c[k] = c[k], c[j] }
+func (i Items) Less(j, k int) bool { return i[j].ID < i[k].ID }
+func (i Items) Swap(j, k int)      { i[j], i[k] = i[k], i[j] }
 func (i Items) Sort()              { sort.Sort(i) }
