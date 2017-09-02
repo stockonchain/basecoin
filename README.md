@@ -1,4 +1,4 @@
-# Basecoin
+# StockOnChain over Basecoin
 
 _DISCLAIMER: Basecoin is not associated with Coinbase.com, an excellent Bitcoin/Ethereum service._
 

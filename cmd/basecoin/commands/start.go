@@ -67,6 +67,10 @@ func startCmd(cmd *cobra.Command, args []string) error {
 
 	// Create Basecoin app
 	basecoinApp := app.NewBasecoin(eyesCli)
+
+	// Clean way to close the basecoinApp instance ... Use for closing database module
+	defer basecoinApp.Close()
+
 	basecoinApp.SetLogger(logger.With("module", "app"))
 
 	// register IBC plugn

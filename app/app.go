@@ -27,6 +27,7 @@ type Basecoin struct {
 	cacheState *sm.State
 	plugins    *types.Plugins
 	logger     log.Logger
+	db         *BasecoinDBPG
 }
 
 func NewBasecoin(eyesCli *eyes.Client) *Basecoin {
@@ -38,7 +39,12 @@ func NewBasecoin(eyesCli *eyes.Client) *Basecoin {
 		cacheState: nil,
 		plugins:    plugins,
 		logger:     log.NewNopLogger(),
+		db:         NewBasecoinDBPG(),
 	}
+}
+
+func (app *Basecoin) Close() {
+	app.db.Close();
 }
 
 func (app *Basecoin) SetLogger(l log.Logger) {
@@ -123,6 +129,9 @@ func (app *Basecoin) DeliverTx(txBytes []byte) (res abci.Result) {
 	if res.IsErr() {
 		return res.PrependLog("Error in DeliverTx")
 	}
+
+	//TODO Add insert in postgreSQL some tx data
+
 	return res
 }
 
