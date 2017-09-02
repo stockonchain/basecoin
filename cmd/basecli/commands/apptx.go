@@ -69,12 +69,12 @@ func (a *AppTx) ValidateBasic() error {
 	if len(in.Address) != 20 {
 		return errors.Errorf("Invalid input address length: %d", len(in.Address))
 	}
-	if !in.Coins.IsValid() {
-		return errors.Errorf("Invalid input coins %v", in.Coins)
-	}
+	if !in.Items.IsValid() {
+		return errors.Errorf("Invalid input Items %v", in.Items)
+	}/*
 	if in.Coins.IsZero() {
 		return errors.New("Input coins cannot be zero")
-	}
+	}*/
 	if in.Sequence <= 0 {
 		return errors.New("Sequence must be greater than 0")
 	}

@@ -79,33 +79,38 @@ func doSendTx(cmd *cobra.Command, args []string) error {
 
 func readSendTxFlags(tx *btypes.SendTx) error {
 	// parse to address
+	/*
 	to, err := parseChainAddress(viper.GetString(FlagTo))
 	if err != nil {
 		return err
+	}*/
+	amountItems, err := btypes.ParseItems(viper.GetString(FlagAmount))
+	if err != nil {
+		return err
 	}
-
+	
 	//parse the fee and amounts into coin types
 	tx.Fee, err = btypes.ParseCoin(viper.GetString(FlagFee))
 	if err != nil {
 		return err
 	}
-	amountCoins, err := btypes.ParseCoins(viper.GetString(FlagAmount))
-	if err != nil {
-		return err
-	}
+	//amountCoins, err := btypes.ParseCoins(viper.GetString(FlagAmount))
+	
 
 	// set the gas
 	tx.Gas = viper.GetInt64(FlagGas)
 
 	// craft the inputs and outputs
 	tx.Inputs = []btypes.TxInput{{
-		Coins:    amountCoins,
+		//Coins:    amountCoins,
+		Items: amountItems,
 		Sequence: viper.GetInt(FlagSequence),
 	}}
+	/*
 	tx.Outputs = []btypes.TxOutput{{
 		Address: to,
 		Coins:   amountCoins,
-	}}
+	}}*/
 
 	return nil
 }
@@ -168,8 +173,10 @@ func ReadAppTxFlags() (gas int64, fee btypes.Coin, txInput btypes.TxInput, err e
 	}
 
 	// retrieve the amount
-	var amount btypes.Coins
-	amount, err = btypes.ParseCoins(viper.GetString(FlagAmount))
+	//var amount btypes.Coins
+	//amount, err = btypes.ParseCoins(viper.GetString(FlagAmount))
+	var amount btypes.Items
+	amount, err = btypes.ParseItems(viper.GetString(FlagAmount))
 	if err != nil {
 		return
 	}
@@ -185,7 +192,7 @@ func ReadAppTxFlags() (gas int64, fee btypes.Coin, txInput btypes.TxInput, err e
 
 	// set the output
 	txInput = btypes.TxInput{
-		Coins:    amount,
+		Items:    amount,
 		Sequence: viper.GetInt(FlagSequence),
 		Address:  addr,
 	}
