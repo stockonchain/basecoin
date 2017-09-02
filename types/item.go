@@ -27,7 +27,7 @@ func (item Item) String() string {
 //var reDenom = regexp.MustCompile("")
 //var reAmt = regexp.MustCompile("(\\d+)")
 
-var reItem = regexp.MustCompile("^([[:digit:]]+)[[:space:]]*([[:digit:]]+)$")
+var reItem = regexp.MustCompile("^([[:digit:]]+)[[:space:]]+([[:digit:]]+)$")
 
 func ParseItem(str string) (Item, error) {
 	var item Item
