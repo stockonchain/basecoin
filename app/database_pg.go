@@ -15,7 +15,6 @@ const (
 
 type BasecoinDBPG struct {
 	con *sql.DB;
-	lasterr error;
 }
 
 func NewBasecoinDBPG() *BasecoinDBPG {
@@ -26,7 +25,6 @@ func NewBasecoinDBPG() *BasecoinDBPG {
 	fmt.Println("Stockonchain connected to database")
 	return &BasecoinDBPG{
 		con : con,
-		lasterr : err,
 	}
 }
 
@@ -34,11 +32,13 @@ func (db *BasecoinDBPG) Close() {
 	db.con.Close();
 }
 
-func (db *BasecoinDBPG) AddTransaction() {
+func (db *BasecoinDBPG) AddTransaction(amount int, rxTxType int, productId int) {
 	var lastInsertId int
-	db.lasterr = db.con.QueryRow("INSERT INTO TRANSACTION(AMOUNT, TYPE, PRODUCTID) VALUES($1,$2,$3) returning id;").Scan(&lastInsertId)
-	checkErr(db.lasterr)
-	fmt.Println("last inserted id =", lastInsertId)
+	err := db.con.QueryRow("INSERT INTO TRANSACTION(AMOUNT, TYPE, PRODUCTID) VALUES($1,$2,$3) returning TRANSACTIONID;", amount, rxTxType, productId).Scan(&lastInsertId)
+	checkErr(err)
+	if err != nil {
+		fmt.Println("Transaction inserted with id =", lastInsertId)
+	}
 }
 
 func checkErr(err error) {
