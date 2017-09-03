@@ -7,10 +7,12 @@ import (
 
 	//"github.com/tendermint/basecoin/plugins/ibc"
 	"github.com/tendermint/basecoin/types"
+	"github.com/tendermint/basecoin/db"
+	"fmt"
 )
 
 // If the tx is invalid, a TMSP error will be returned.
-func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc events.Fireable) abci.Result {
+func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc events.Fireable, db db.BasecoinDBPG) abci.Result {
 	chainID := state.GetChainID()
 
 	// Exec tx
@@ -51,7 +53,7 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		//outPlusFees := outTotal
 		fees := types.Coins{tx.Fee}
 		
-		if fees.IsValid() { // TODO: fix coins.Plus()
+		if !fees.IsValid() { // TODO: fix coins.Plus()
 			//outPlusFees = outTotal.Plus(fees)
 			return abci.ErrBaseInvalidOutput.AppendLog(cmn.Fmt("Fees (%v) invalid", fees))
 		}
@@ -64,6 +66,7 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 
 		// Good! Adjust accounts
 		adjustByInputs(state, accounts, tx.Inputs)
+
 		//adjustByOutputs(state, accounts, tx.Outputs, isCheckTx)
 
 		/*
@@ -79,6 +82,13 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 				}
 			}
 		*/
+
+		if !isCheckTx {
+			err := db.AddTransaction(tx.Inputs)
+			if err != nil {
+				fmt.Errorf("Unable to add transaction to database ", err)
+			}
+		}
 
 		return abci.NewResultOK(types.TxID(chainID, tx), "")
 

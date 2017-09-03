@@ -14,6 +14,7 @@ import (
 	sm "github.com/tendermint/basecoin/state"
 	"github.com/tendermint/basecoin/types"
 	"github.com/tendermint/basecoin/version"
+	"github.com/tendermint/basecoin/db"
 )
 
 const (
@@ -27,7 +28,7 @@ type Basecoin struct {
 	cacheState *sm.State
 	plugins    *types.Plugins
 	logger     log.Logger
-	db         *BasecoinDBPG
+	db         *db.BasecoinDBPG
 }
 
 func NewBasecoin(eyesCli *eyes.Client) *Basecoin {
@@ -39,7 +40,7 @@ func NewBasecoin(eyesCli *eyes.Client) *Basecoin {
 		cacheState: nil,
 		plugins:    plugins,
 		logger:     log.NewNopLogger(),
-		db:         NewBasecoinDBPG(),
+		db:         db.NewBasecoinDBPG(),
 	}
 }
 
@@ -125,11 +126,10 @@ func (app *Basecoin) DeliverTx(txBytes []byte) (res abci.Result) {
 	}
 
 	// Validate and exec tx
-	res = sm.ExecTx(app.state, app.plugins, tx, false, nil)
+	res = sm.ExecTx(app.state, app.plugins, tx, false, nil, *app.db)
 	if res.IsErr() {
 		return res.PrependLog("Error in DeliverTx")
 	}
-
 	//TODO Add insert in postgreSQL some tx data
 
 	return res
@@ -149,7 +149,7 @@ func (app *Basecoin) CheckTx(txBytes []byte) (res abci.Result) {
 	}
 
 	// Validate tx
-	res = sm.ExecTx(app.cacheState, app.plugins, tx, true, nil)
+	res = sm.ExecTx(app.cacheState, app.plugins, tx, true, nil, *app.db)
 	if res.IsErr() {
 		return res.PrependLog("Error in CheckTx")
 	}
