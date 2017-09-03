@@ -126,7 +126,7 @@ func (app *Basecoin) DeliverTx(txBytes []byte) (res abci.Result) {
 	}
 
 	// Validate and exec tx
-	res = sm.ExecTx(app.state, app.plugins, tx, false, nil, *app.db)
+	res = sm.ExecTx(app.state, app.plugins, tx, false, nil, app.db)
 	if res.IsErr() {
 		return res.PrependLog("Error in DeliverTx")
 	}
@@ -149,7 +149,7 @@ func (app *Basecoin) CheckTx(txBytes []byte) (res abci.Result) {
 	}
 
 	// Validate tx
-	res = sm.ExecTx(app.cacheState, app.plugins, tx, true, nil, *app.db)
+	res = sm.ExecTx(app.cacheState, app.plugins, tx, true, nil, app.db)
 	if res.IsErr() {
 		return res.PrependLog("Error in CheckTx")
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 // If the tx is invalid, a TMSP error will be returned.
-func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc events.Fireable, db db.BasecoinDBPG) abci.Result {
+func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc events.Fireable, db *db.BasecoinDBPG) abci.Result {
 	chainID := state.GetChainID()
 
 	// Exec tx
@@ -82,8 +82,7 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 				}
 			}
 		*/
-
-		if !isCheckTx {
+		if !isCheckTx && db != nil {
 			err := db.AddTransaction(tx.Inputs)
 			if err != nil {
 				fmt.Errorf("Unable to add transaction to database ", err)

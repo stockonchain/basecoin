@@ -14,8 +14,6 @@ const (
 	DBPassword				= "postgres"
 	DBUser					= "postgres"
 	DBName					= "stockonchain"
-	DBTypeSendTxValue		= 0
-	DBTypeSendRxValue		= 1
 )
 
 type BasecoinDBPG struct {
@@ -26,7 +24,10 @@ func NewBasecoinDBPG() *BasecoinDBPG {
 	dbinfo := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
 		DBHostAddress, DBUser, DBPassword, DBName)
 	con, err := sql.Open("postgres", dbinfo)
-	checkErr(err);
+	if err {
+		fmt.Println( err )
+		return nil
+	}
 	fmt.Println("Stockonchain connected to database")
 	return &BasecoinDBPG{
 		con : con,
@@ -40,7 +41,6 @@ func (db *BasecoinDBPG) Close() {
 func AddTransactionSingle(db *BasecoinDBPG, rxTxType int) (int64, error) {
 	var lastInsertId int64
 	err := db.con.QueryRow("INSERT INTO transactionstock(type) VALUES($1) returning transactionid;", rxTxType).Scan(&lastInsertId)
-	checkErr(err)
 	if err != nil {
 		return 0, err;
 	}
@@ -50,7 +50,6 @@ func AddTransactionSingle(db *BasecoinDBPG, rxTxType int) (int64, error) {
 
 func AddTransactionItemSingle(db *BasecoinDBPG, amount int64, trid int64, itemid int64) error {
 	_, err := db.con.Query("INSERT INTO transaction_item(amount, transactionid, itemid) VALUES($1,$2,$3);", amount, trid, itemid)
-	checkErr(err)
 	if err != nil {
 		return err;
 	}
@@ -83,10 +82,4 @@ func (db *BasecoinDBPG) AddTransaction(ins []types.TxInput) error {
 		txn.Commit()
 	}
 	return nil
-}
-
-func checkErr(err error) {
-	if err != nil {
-		fmt.Println(err)
-	}
 }
