@@ -81,5 +81,6 @@ func (db *BasecoinDBPG) AddTransaction(ins []types.TxInput) error {
 		}
 		txn.Commit()
 	}
+	fmt.Println("Transaction completed with ", len(ins), " transaction inserted")
 	return nil
 }

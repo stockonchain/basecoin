@@ -51,12 +51,12 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		}
 		//outTotal := sumOutputs(tx.Outputs)
 		//outPlusFees := outTotal
-		fees := types.Coins{tx.Fee}
+		//fees := types.Coins{tx.Fee}
 		
-		if !fees.IsValid() { // TODO: fix coins.Plus()
+		//if fees.IsValid() { // TODO: fix coins.Plus()
 			//outPlusFees = outTotal.Plus(fees)
-			return abci.ErrBaseInvalidOutput.AppendLog(cmn.Fmt("Fees (%v) invalid", fees))
-		}
+		//	return abci.ErrBaseInvalidOutput.AppendLog(cmn.Fmt("Fees (%v) invalid", fees))
+		//}
 		/*
 		if !inTotal.IsEqual(outPlusFees) {
 			return abci.ErrBaseInvalidOutput.AppendLog(cmn.Fmt("Input total (%v) != output total + fees (%v)", inTotal, outPlusFees))
@@ -85,7 +85,7 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		if !isCheckTx && db != nil {
 			err := db.AddTransaction(tx.Inputs)
 			if err != nil {
-				fmt.Errorf("Unable to add transaction to database ", err)
+				fmt.Println("Unable to add transaction to database ", err)
 			}
 		}
 
