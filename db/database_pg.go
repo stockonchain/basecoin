@@ -24,7 +24,7 @@ func NewBasecoinDBPG() *BasecoinDBPG {
 	dbinfo := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
 		DBHostAddress, DBUser, DBPassword, DBName)
 	con, err := sql.Open("postgres", dbinfo)
-	if err {
+	if err != nil {
 		fmt.Println( err )
 		return nil
 	}
