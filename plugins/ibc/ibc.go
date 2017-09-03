@@ -403,9 +403,11 @@ func (sm *IBCStateMachine) runPacketCreateTx(tx IBCPacketCreateTx) {
 	}
 
 	// Execute the payload
+	/*
 	switch payload := tx.Packet.Payload.(type) {
 	case DataPayload:
 		// do nothing
+		
 	case CoinsPayload:
 		// ensure enough coins were sent in tx to cover the payload coins
 		if !sm.ctx.Coins.IsGTE(payload.Coins) {
@@ -416,7 +418,7 @@ func (sm *IBCStateMachine) runPacketCreateTx(tx IBCPacketCreateTx) {
 
 		// deduct coins from context
 		sm.ctx.Coins = sm.ctx.Coins.Minus(payload.Coins)
-	}
+	}*/
 
 	// Save new Packet
 	save(sm.store, packetKey, packet)

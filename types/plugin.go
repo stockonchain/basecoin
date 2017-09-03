@@ -26,14 +26,16 @@ type Plugin interface {
 type CallContext struct {
 	CallerAddress []byte   // Caller's Address (hash of PubKey)
 	CallerAccount *Account // Caller's Account, w/ fee & TxInputs deducted
-	Coins         Coins    // The coins that the caller wishes to spend, excluding fees
+	//Coins         Coins    // The coins that the caller wishes to spend, excluding fees
+	Items          Items
 }
 
-func NewCallContext(callerAddress []byte, callerAccount *Account, coins Coins) CallContext {
+func NewCallContext(callerAddress []byte, callerAccount *Account, items Items) CallContext {
 	return CallContext{
 		CallerAddress: callerAddress,
 		CallerAccount: callerAccount,
-		Coins:         coins,
+		//Coins:         coins,
+		Items: 			items,
 	}
 }
 

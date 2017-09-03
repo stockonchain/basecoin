@@ -255,7 +255,8 @@ func (r *relayer) appTx(ibcTx ibc.IBCTx) error {
 
 	smallCoins := types.Coin{"mycoin", 1}
 
-	input := types.NewTxInput(r.privKey.PubKey, types.Coins{smallCoins}, sequence)
+	//input := types.NewTxInput(r.privKey.PubKey, types.Coins{smallCoins}, sequence)
+	input := types.NewTxInput(r.privKey.PubKey, nil, sequence)
 	tx := &types.AppTx{
 		Gas:   0,
 		Fee:   smallCoins,

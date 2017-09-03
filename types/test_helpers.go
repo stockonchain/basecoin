@@ -37,7 +37,7 @@ func RandAccounts(num int, minAmount int64, maxAmount int64) []PrivAccount {
 			PrivKey: privKey,
 			Account: Account{
 				PubKey:  pubKey,
-				Balance: Coins{Coin{"", balance}},
+				//Balance: Coins{Coin{"", balance}},
 			},
 		}
 	}
@@ -58,7 +58,7 @@ func RandAccounts(num int, minAmount int64, maxAmount int64) []PrivAccount {
 
 func MakeAcc(secret string) PrivAccount {
 	privAcc := PrivAccountFromSecret(secret)
-	privAcc.Account.Balance = Coins{{"mycoin", 7}}
+	//privAcc.Account.Balance = Coins{{"mycoin", 7}}
 	return privAcc
 }
 
@@ -67,7 +67,8 @@ func Accs2TxInputs(seq int, accs ...PrivAccount) []TxInput {
 	for _, acc := range accs {
 		tx := NewTxInput(
 			acc.Account.PubKey,
-			Coins{{"mycoin", 5}},
+			//Coins{{"mycoin", 5}},
+			Items{{1, 5}},
 			seq)
 		txs = append(txs, tx)
 	}
@@ -75,6 +76,7 @@ func Accs2TxInputs(seq int, accs ...PrivAccount) []TxInput {
 }
 
 //turn a list of accounts into basic list of transaction outputs
+/*
 func Accs2TxOutputs(accs ...PrivAccount) []TxOutput {
 	var txs []TxOutput
 	for _, acc := range accs {
@@ -85,13 +87,14 @@ func Accs2TxOutputs(accs ...PrivAccount) []TxOutput {
 	}
 	return txs
 }
+*/
 
 func MakeSendTx(seq int, accOut PrivAccount, accsIn ...PrivAccount) *SendTx {
 	tx := &SendTx{
 		Gas:     0,
 		Fee:     Coin{"mycoin", 1},
 		Inputs:  Accs2TxInputs(seq, accsIn...),
-		Outputs: Accs2TxOutputs(accOut),
+		//Outputs: Accs2TxOutputs(accOut),
 	}
 
 	return tx
