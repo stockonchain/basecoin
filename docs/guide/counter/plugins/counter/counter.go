@@ -59,8 +59,9 @@ func (cp *CounterPlugin) RunTx(store types.KVStore, ctx types.CallContext, txByt
 	}
 
 	// Did the caller provide enough coins?
-	if !ctx.Coins.IsGTE(tx.Fee) {
-		return abci.ErrInsufficientFunds.AppendLog("CounterTx.Fee was not provided")
+	//if !ctx.Coins.IsGTE(tx.Fee) {
+	if !ctx.CallerAccount.Balance.IsGTE(tx.Fee) {
+		return abci.ErrInsufficientFunds.AppendLog("Balance is below CounterTx.Fee")
 	}
 
 	// TODO If there are any funds left over, return funds.

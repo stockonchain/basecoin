@@ -5,7 +5,7 @@ import (
 	cmn "github.com/tendermint/tmlibs/common"
 	"github.com/tendermint/tmlibs/events"
 
-	"github.com/tendermint/basecoin/plugins/ibc"
+	//"github.com/tendermint/basecoin/plugins/ibc"
 	"github.com/tendermint/basecoin/types"
 )
 
@@ -21,10 +21,11 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		if res.IsErr() {
 			return res.PrependLog("in validateInputsBasic()")
 		}
+		/*
 		res = validateOutputsBasic(tx.Outputs)
 		if res.IsErr() {
 			return res.PrependLog("in validateOutputsBasic()")
-		}
+		}*/
 
 		// Get inputs
 		accounts, res := getInputs(state, tx.Inputs)
@@ -33,32 +34,37 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		}
 
 		// Get or make outputs.
+		/*
 		accounts, res = getOrMakeOutputs(state, accounts, tx.Outputs)
 		if res.IsErr() {
 			return res.PrependLog("in getOrMakeOutputs()")
-		}
+		}*/
 
 		// Validate inputs and outputs, advanced
 		signBytes := tx.SignBytes(chainID)
-		inTotal, res := validateInputsAdvanced(accounts, signBytes, tx.Inputs)
+		//inTotal, res := validateInputsAdvanced(accounts, signBytes, tx.Inputs)
+		res = validateInputsAdvanced(accounts, signBytes, tx.Inputs)
 		if res.IsErr() {
 			return res.PrependLog("in validateInputsAdvanced()")
 		}
-		outTotal := sumOutputs(tx.Outputs)
-		outPlusFees := outTotal
+		//outTotal := sumOutputs(tx.Outputs)
+		//outPlusFees := outTotal
 		fees := types.Coins{tx.Fee}
+		
 		if fees.IsValid() { // TODO: fix coins.Plus()
-			outPlusFees = outTotal.Plus(fees)
+			//outPlusFees = outTotal.Plus(fees)
+			return abci.ErrBaseInvalidOutput.AppendLog(cmn.Fmt("Fees (%v) invalid", fees))
 		}
+		/*
 		if !inTotal.IsEqual(outPlusFees) {
 			return abci.ErrBaseInvalidOutput.AppendLog(cmn.Fmt("Input total (%v) != output total + fees (%v)", inTotal, outPlusFees))
-		}
+		}*/
 
 		// TODO: Fee validation for SendTx
 
 		// Good! Adjust accounts
 		adjustByInputs(state, accounts, tx.Inputs)
-		adjustByOutputs(state, accounts, tx.Outputs, isCheckTx)
+		//adjustByOutputs(state, accounts, tx.Outputs, isCheckTx)
 
 		/*
 			// Fire events
@@ -99,10 +105,11 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 			state.logger.Info(cmn.Fmt("validateInputAdvanced failed on %X: %v", tx.Input.Address, res))
 			return res.PrependLog("in validateInputAdvanced()")
 		}
+		/*
 		if !tx.Input.Coins.IsGTE(types.Coins{tx.Fee}) {
 			state.logger.Info(cmn.Fmt("Sender did not send enough to cover the fee %X", tx.Input.Address))
 			return abci.ErrBaseInsufficientFunds.AppendLog(cmn.Fmt("input coins is %v, but fee is %v", tx.Input.Coins, types.Coins{tx.Fee}))
-		}
+		}*/
 
 		// Validate call address
 		plugin := pgz.GetByName(tx.Name)
@@ -112,9 +119,11 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		}
 
 		// Good!
-		coins := tx.Input.Coins.Minus(types.Coins{tx.Fee})
+		//coins := tx.Input.Coins.Minus(types.Coins{tx.Fee})
 		inAcc.Sequence += 1
-		inAcc.Balance = inAcc.Balance.Minus(tx.Input.Coins)
+		//inAcc.Balance = inAcc.Balance.Minus(tx.Input.Coins)
+		inAcc.Balance = inAcc.Balance.Minus(types.Coins{tx.Fee})
+		items := tx.Input.Items
 
 		// If this is a CheckTx, stop now.
 		if isCheckTx {
@@ -128,7 +137,8 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		// Run the tx.
 		cache := state.CacheWrap()
 		cache.SetAccount(tx.Input.Address, inAcc)
-		ctx := types.NewCallContext(tx.Input.Address, inAcc, coins)
+		//ctx := types.NewCallContext(tx.Input.Address, inAcc, coins)
+		ctx := types.NewCallContext(tx.Input.Address, inAcc, items)
 		res = plugin.RunTx(cache, ctx, tx.Data)
 		if res.IsOK() {
 			cache.CacheSync()
@@ -147,7 +157,8 @@ func ExecTx(state *State, pgz *types.Plugins, tx types.Tx, isCheckTx bool, evc e
 		} else {
 			state.logger.Info("AppTx failed", "error", res)
 			// Just return the coins and return.
-			inAccCopy.Balance = inAccCopy.Balance.Plus(coins)
+			//inAccCopy.Balance = inAccCopy.Balance.Plus(coins)
+			inAccCopy.Balance = inAccCopy.Balance.Plus(types.Coins{tx.Fee})
 			// But take the gas
 			// TODO
 			state.SetAccount(tx.Input.Address, inAccCopy)
@@ -184,7 +195,7 @@ func getInputs(state types.AccountGetter, ins []types.TxInput) (map[string]*type
 	}
 	return accounts, abci.OK
 }
-
+/*
 func getOrMakeOutputs(state types.AccountGetter, accounts map[string]*types.Account, outs []types.TxOutput) (map[string]*types.Account, abci.Result) {
 	if accounts == nil {
 		accounts = make(map[string]*types.Account)
@@ -210,7 +221,7 @@ func getOrMakeOutputs(state types.AccountGetter, accounts map[string]*types.Acco
 		accounts[string(outAddress)] = acc
 	}
 	return accounts, abci.OK
-}
+}*/
 
 // Validate inputs basic structure
 func validateInputsBasic(ins []types.TxInput) (res abci.Result) {
@@ -224,7 +235,8 @@ func validateInputsBasic(ins []types.TxInput) (res abci.Result) {
 }
 
 // Validate inputs and compute total amount of coins
-func validateInputsAdvanced(accounts map[string]*types.Account, signBytes []byte, ins []types.TxInput) (total types.Coins, res abci.Result) {
+//func validateInputsAdvanced(accounts map[string]*types.Account, signBytes []byte, ins []types.TxInput) (total types.Coins, res abci.Result) {
+func validateInputsAdvanced(accounts map[string]*types.Account, signBytes []byte, ins []types.TxInput) (res abci.Result) {
 	for _, in := range ins {
 		acc := accounts[string(in.Address)]
 		if acc == nil {
@@ -235,28 +247,31 @@ func validateInputsAdvanced(accounts map[string]*types.Account, signBytes []byte
 			return
 		}
 		// Good. Add amount to total
-		total = total.Plus(in.Coins)
+		//total = total.Plus(in.Coins)
 	}
-	return total, abci.OK
+	//return total, abci.OK
+	return abci.OK
 }
 
 func validateInputAdvanced(acc *types.Account, signBytes []byte, in types.TxInput) (res abci.Result) {
 	// Check sequence/coins
-	seq, balance := acc.Sequence, acc.Balance
+	//seq, balance := acc.Sequence, acc.Balance
+	seq := acc.Sequence
 	if seq+1 != in.Sequence {
 		return abci.ErrBaseInvalidSequence.AppendLog(cmn.Fmt("Got %v, expected %v. (acc.seq=%v)", in.Sequence, seq+1, acc.Sequence))
 	}
+	/*
 	// Check amount
 	if !balance.IsGTE(in.Coins) {
 		return abci.ErrBaseInsufficientFunds.AppendLog(cmn.Fmt("balance is %v, tried to send %v", balance, in.Coins))
-	}
+	}*/
 	// Check signatures
 	if !acc.PubKey.VerifyBytes(signBytes, in.Signature) {
 		return abci.ErrBaseInvalidSignature.AppendLog(cmn.Fmt("SignBytes: %X", signBytes))
 	}
 	return abci.OK
 }
-
+/*
 func validateOutputsBasic(outs []types.TxOutput) (res abci.Result) {
 	for _, out := range outs {
 		// Check TxOutput basic
@@ -273,22 +288,22 @@ func sumOutputs(outs []types.TxOutput) (total types.Coins) {
 	}
 	return total
 }
-
+*/
 func adjustByInputs(state types.AccountSetter, accounts map[string]*types.Account, ins []types.TxInput) {
 	for _, in := range ins {
 		acc := accounts[string(in.Address)]
 		if acc == nil {
 			cmn.PanicSanity("adjustByInputs() expects account in accounts")
-		}
+		}/*
 		if !acc.Balance.IsGTE(in.Coins) {
 			cmn.PanicSanity("adjustByInputs() expects sufficient funds")
 		}
-		acc.Balance = acc.Balance.Minus(in.Coins)
+		acc.Balance = acc.Balance.Minus(in.Coins)*/
 		acc.Sequence += 1
 		state.SetAccount(in.Address, acc)
 	}
 }
-
+/*
 func adjustByOutputs(state *State, accounts map[string]*types.Account, outs []types.TxOutput, isCheckTx bool) {
 	for _, out := range outs {
 		destChain, outAddress, _ := out.ChainAndAddress() // already validated
@@ -308,3 +323,4 @@ func adjustByOutputs(state *State, accounts map[string]*types.Account, outs []ty
 		}
 	}
 }
+*/

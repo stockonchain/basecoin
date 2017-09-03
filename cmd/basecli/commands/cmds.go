@@ -31,6 +31,7 @@ var SendTxCmd = &cobra.Command{
 const (
 	FlagTo       = "to"
 	FlagAmount   = "amount"
+	FlagType     = "type"
 	FlagFee      = "fee"
 	FlagGas      = "gas"
 	FlagSequence = "sequence"
@@ -41,6 +42,7 @@ func init() {
 	flags.String(FlagTo, "", "Destination address for the bits")
 	flags.String(FlagAmount, "", "Coins to send in the format <amt><coin>,<amt><coin>...")
 	flags.String(FlagFee, "0mycoin", "Coins for the transaction fee of the format <amt><coin>")
+	flags.Bool(FlagType, true, "Type of the transaction 0 for IN/ 1 for OUT")
 	flags.Int64(FlagGas, 0, "Amount of gas for this transaction")
 	flags.Int(FlagSequence, -1, "Sequence number for this transaction")
 }
@@ -88,6 +90,8 @@ func readSendTxFlags(tx *btypes.SendTx) error {
 	if err != nil {
 		return err
 	}
+
+
 	
 	//parse the fee and amounts into coin types
 	tx.Fee, err = btypes.ParseCoin(viper.GetString(FlagFee))
@@ -105,6 +109,7 @@ func readSendTxFlags(tx *btypes.SendTx) error {
 		//Coins:    amountCoins,
 		Items: amountItems,
 		Sequence: viper.GetInt(FlagSequence),
+		Type: viper.GetBool(FlagType),
 	}}
 	/*
 	tx.Outputs = []btypes.TxOutput{{
@@ -154,6 +159,7 @@ func BroadcastAppTx(tx *btypes.AppTx) (*ctypes.ResultBroadcastTxCommit, error) {
 // AddAppTxFlags adds flags required by apptx
 func AddAppTxFlags(fs *flag.FlagSet) {
 	fs.String(FlagAmount, "", "Coins to send in the format <amt><coin>,<amt><coin>...")
+        fs.Bool(FlagType, true, "Type of the transaction 0 for IN/ 1 for OUT")
 	fs.String(FlagFee, "0mycoin", "Coins for the transaction fee of the format <amt><coin>")
 	fs.Int64(FlagGas, 0, "Amount of gas for this transaction")
 	fs.Int(FlagSequence, -1, "Sequence number for this transaction")
@@ -181,6 +187,12 @@ func ReadAppTxFlags() (gas int64, fee btypes.Coin, txInput btypes.TxInput, err e
 		return
 	}
 
+
+	if err != nil {
+		return
+	}
+
+
 	// get the PubKey of the signer
 	pk := txcmd.GetSigner()
 
@@ -195,6 +207,7 @@ func ReadAppTxFlags() (gas int64, fee btypes.Coin, txInput btypes.TxInput, err e
 		Items:    amount,
 		Sequence: viper.GetInt(FlagSequence),
 		Address:  addr,
+		Type:  viper.GetBool(FlagType),
 	}
 	// set the pubkey if needed
 	if txInput.Sequence == 1 {

@@ -66,7 +66,7 @@ func (p *TxS) UnmarshalJSON(data []byte) (err error) {
 type TxInput struct {
 	Address   data.Bytes       `json:"address"`   // Hash of the PubKey
 	Items     Items            `json:"items"`
-	Type      bool             `json:"Tx type"`   // item receive = 0, item send = 1
+	Type      bool             `json:"tx_type"`   // item receive = 0, item send = 1
 	Sequence  int              `json:"sequence"`  // Must be 1 greater than the last committed TxInput
 	Signature crypto.Signature `json:"signature"` // Depends on the PubKey type and the whole Tx
 	PubKey    crypto.PubKey    `json:"pub_key"`   // Is present iff Sequence == 0
